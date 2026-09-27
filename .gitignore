@@ -1,0 +1,14 @@
+node_modules/
+node_modules
+.chatwork-bridge/
+.env
+*.log
+.DS_Store
+*.key
+*.pem
+*.p12
+*.pfx
+*.mobileprovision
+.runtime-*/
+runtime-*/
+coverage/

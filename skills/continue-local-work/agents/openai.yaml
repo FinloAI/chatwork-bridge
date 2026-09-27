@@ -1,0 +1,13 @@
+interface:
+  display_name: "Continue Local Work"
+  short_description: "Continue local projects, jobs, and desktop work."
+  default_prompt: "Use $continue-local-work to inspect and continue my local project, including verified edits and long-running jobs."
+dependencies:
+  tools:
+    - type: "mcp"
+      value: "chatwork-bridge"
+      description: "Controlled access to allowed local folders, jobs, and macOS actions."
+      transport: "streamable_http"
+      url: "http://127.0.0.1:7337/mcp"
+policy:
+  allow_implicit_invocation: true

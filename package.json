@@ -1,0 +1,23 @@
+{
+  "name": "chatwork-bridge",
+  "version": "0.4.4",
+  "private": true,
+  "type": "module",
+  "description": "A local MCP bridge that gives ChatGPT controlled project, job, and macOS computer tools.",
+  "scripts": {
+    "start": "node src/server.js",
+    "start:stdio": "node src/server.js --stdio",
+    "test": "node --test",
+    "check": "node --check src/server.js && node --test",
+    "smoke:stdio": "node scripts/smoke-stdio.js",
+    "smoke:http": "node scripts/smoke-http.js",
+    "smoke:training": "node scripts/smoke-training-chain.js"
+  },
+  "engines": {
+    "node": ">=20"
+  },
+  "dependencies": {
+    "@modelcontextprotocol/sdk": "1.30.0",
+    "zod": "4.4.3"
+  }
+}

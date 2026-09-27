@@ -1,0 +1,34 @@
+{
+  "name": "chatwork-bridge",
+  "version": "0.4.4",
+  "description": "Add 32 local-work MCP tools for project inspection, guarded edits, recoverable jobs, Apple MPS, read-only Git, and native macOS UI control, with explicit stale-tool-subset recovery guidance.",
+  "author": {
+    "name": "Finn Niklas"
+  },
+  "skills": "./skills/",
+  "interface": {
+    "displayName": "Chatwork Bridge",
+    "shortDescription": "32 local-work tools with guarded writes and recoverable jobs.",
+    "longDescription": "Chatwork Bridge 0.4.4 gives ChatGPT or Codex a 32-tool local execution layer: workspace snapshots, explicit full-read/project-write access diagnostics, precise scan truncation reasons, project-scoped edits and sandboxed commands, validated patches, read-only Git inspection, persistent supervised jobs with efficient waits, pressure-aware Apple MPS runtime checks, and native macOS Accessibility actions. A conversation may initially load only a small task-selected subset of schemas; the Bridge explicitly tells the model not to mistake that for a read-only server and to rediscover apply_patch/write_file, run_command, start_job, or capability_catalog when the task needs them. Synchronous commands are capped below the Secure MCP Tunnel response deadline so long work cannot poison the channel; training, downloads, builds, and benchmarks use recoverable jobs. Its stable runtime lives in Application Support, mutating calls are audited and marked for confirmation, and macOS commands report process-sandbox status.",
+    "developerName": "Finn Niklas",
+    "category": "Productivity",
+    "capabilities": [
+      "32 local-work MCP tools",
+      "Workspace snapshots",
+      "Batch file reads",
+      "Validated project patches",
+      "Read-only Git inspection",
+      "Persistent supervised jobs",
+      "Apple MPS",
+      "macOS computer control",
+      "Project-scoped process sandbox"
+    ],
+    "defaultPrompt": [
+      "Resume this local project with workspace_snapshot, make focused changes, and verify them.",
+      "Inspect my Python and MPS runtime, then start and monitor this training job safely.",
+      "Diagnose Chatwork Bridge after a timeout and recover any running jobs.",
+      "If only read or discovery tools appear at first, rediscover apply_patch, run_command, start_job, or capability_catalog before concluding the Bridge is read-only."
+    ]
+  },
+  "mcpServers": "./.mcp.json"
+}

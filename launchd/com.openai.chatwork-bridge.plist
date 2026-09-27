@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+  <key>Label</key>
+  <string>com.openai.chatwork-bridge</string>
+  <key>ProgramArguments</key>
+  <array>
+    <string>CONFIGURED_BY_INSTALLER_TUNNEL_CLIENT</string>
+    <string>run</string>
+    <string>--profile-dir</string>
+    <string>CONFIGURED_BY_INSTALLER_PROFILE_DIR</string>
+    <string>--profile</string>
+    <string>chatwork-local</string>
+  </array>
+  <key>WorkingDirectory</key>
+  <string>CONFIGURED_BY_INSTALLER_RUNTIME</string>
+  <key>RunAtLoad</key>
+  <true/>
+  <key>KeepAlive</key>
+  <true/>
+  <key>ThrottleInterval</key>
+  <integer>15</integer>
+  <key>ProcessType</key>
+  <string>Interactive</string>
+  <key>EnvironmentVariables</key>
+  <dict>
+    <key>PATH</key>
+    <string>CONFIGURED_BY_INSTALLER_PATH</string>
+    <key>NODE_COMPILE_CACHE</key>
+    <string>CONFIGURED_BY_INSTALLER_CACHE</string>
+  </dict>
+  <key>StandardOutPath</key>
+  <string>CONFIGURED_BY_INSTALLER_STDOUT</string>
+  <key>StandardErrorPath</key>
+  <string>CONFIGURED_BY_INSTALLER_STDERR</string>
+</dict>
+</plist>

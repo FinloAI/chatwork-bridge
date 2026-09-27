@@ -1,0 +1,12 @@
+{
+  "mcpServers": {
+    "chatwork-bridge": {
+      "command": "node",
+      "args": ["${pluginDir}/src/server.js", "--stdio"],
+      "env": {
+        "CHATWORK_ROOTS": "${cwd}",
+        "CHATWORK_READ_ROOTS": "${cwd}"
+      }
+    }
+  }
+}

@@ -1,0 +1,257 @@
+import * as z from "zod/v4";
+
+const loose = (shape) => z.object(shape).catchall(z.unknown());
+const stringArray = z.array(z.string());
+const skipped = z.array(loose({ path: z.string(), reason: z.string() }));
+const scan = loose({
+  scannedEntries: z.number().int(),
+  maxEntries: z.number().int(),
+  elapsedMs: z.number(),
+  deadlineMs: z.number(),
+  complete: z.boolean(),
+  resultLimit: z.number().int().optional(),
+});
+// MCP output schemas must be object schemas. Error results are marked isError
+// and intentionally bypass success-output validation in the MCP SDK.
+const result = (schema) => schema;
+
+const fileInfo = loose({
+  path: z.string(),
+  type: z.string(),
+  size: z.number(),
+  mode: z.string(),
+  modified: z.string(),
+  created: z.string(),
+  readable: z.boolean(),
+  writableByBridge: z.boolean(),
+});
+
+const job = loose({
+  id: z.string(),
+  label: z.string(),
+  status: z.string(),
+  pid: z.number(),
+  cwd: z.string(),
+  startedAt: z.string(),
+  alive: z.boolean(),
+  sandboxed: z.boolean().optional(),
+});
+
+const toolSurface = loose({
+  protocolRegisteredCount: z.number().int(),
+  protocolRegisteredNames: stringArray,
+  schemaSha256: z.string(),
+  clientVisibleCount: z.number().int().nullable(),
+  clientVisibilityObservable: z.boolean(),
+  note: z.string(),
+});
+
+const capability = loose({
+  version: z.string(),
+  toolCount: z.number().int(),
+  tools: z.record(z.string(), z.array(z.string())),
+  toolSurface,
+  important: z.record(z.string(), z.string()),
+});
+
+export const OUTPUT_SCHEMAS = Object.freeze({
+  bridge_info: result(loose({
+    roots: stringArray,
+    readRoots: stringArray,
+    writeRoots: stringArray,
+    platform: z.string(),
+    stateDir: z.string(),
+    auditLog: z.string(),
+    version: z.string(),
+    toolCount: z.number().int(),
+    tools: z.record(z.string(), z.array(z.string())),
+    toolSurface,
+    accessProfile: loose({ name: z.string(), fullFilesystemRead: z.boolean() }),
+    capabilities: loose({ files: z.boolean(), commands: z.boolean(), persistentJobs: z.boolean() }),
+    security: z.string(),
+  })),
+  capability_catalog: result(capability),
+  bridge_diagnostics: result(loose({
+    ok: z.boolean(),
+    version: z.string(),
+    process: loose({ pid: z.number().int(), uptimeSeconds: z.number(), node: z.string() }),
+    host: loose({ platform: z.string(), architecture: z.string(), hostname: z.string() }),
+    readRoots: z.array(loose({ path: z.string(), ok: z.boolean() })),
+    writeRoots: z.array(loose({ path: z.string(), ok: z.boolean() })),
+    accessProfile: loose({ name: z.string(), fullFilesystemRead: z.boolean() }),
+    toolSurface,
+    jobs: loose({ known: z.number().int(), running: z.array(z.unknown()) }),
+    limits: z.record(z.string(), z.number()),
+  })),
+  workspace_snapshot: result(loose({
+    workspace: fileInfo,
+    entries: z.array(loose({ path: z.string(), type: z.string(), size: z.number(), modified: z.string(), depth: z.number().int() })),
+    skipped,
+    truncated: z.boolean(),
+    markers: z.array(z.unknown()),
+    guides: z.unknown(),
+    repository: z.unknown(),
+    jobs: z.array(z.unknown()),
+  })),
+  runtime_info: result(loose({
+    host: loose({ platform: z.string(), architecture: z.string(), cpuCount: z.number().int() }),
+    projectPath: z.string(),
+    disk: loose({
+      totalBytes: z.number(),
+      freeBytes: z.number(),
+      usedBytes: z.number(),
+      freeGiB: z.number(),
+      freePercent: z.number().nullable(),
+      lowSpaceForTraining: z.boolean(),
+    }).nullable(),
+    memory: loose({
+      rawFreeMemoryBytes: z.number().nullable(),
+      rawFreeMemoryMeaning: z.string(),
+      pressureFreePercent: z.number().int().nullable(),
+      pressureSource: z.string().nullable(),
+    }),
+    executables: z.record(z.string(), z.unknown()),
+    python: z.array(z.unknown()),
+    mpsReady: z.boolean(),
+    recommendedPython: z.string(),
+    resourceGuidance: loose({ disk: z.string(), memory: z.string() }),
+    cached: z.boolean(),
+  })),
+  get_workflow_guide: result(loose({ guide: z.string() })),
+  list_directory: result(loose({
+    root: z.string(),
+    entries: z.array(loose({ path: z.string(), type: z.string(), size: z.number(), modified: z.string(), depth: z.number().int() })),
+    skipped,
+    truncated: z.boolean(),
+    truncationReasons: stringArray,
+    scan,
+  })),
+  file_info: result(fileInfo),
+  find_files: result(loose({
+    path: z.string(),
+    pattern: z.string(),
+    files: stringArray,
+    skipped,
+    truncated: z.boolean(),
+    truncationReasons: stringArray,
+    scan,
+  })),
+  search_text: result(loose({
+    path: z.string(),
+    query: z.string(),
+    matches: z.array(loose({ path: z.string(), line: z.number().int(), text: z.string() })),
+    skipped,
+    truncated: z.boolean(),
+    truncationReasons: stringArray,
+    scan,
+  })),
+  read_file: result(loose({
+    path: z.string(),
+    startLine: z.number().int(),
+    endLine: z.number().int(),
+    totalLines: z.number().int(),
+    sha256: z.string(),
+    content: z.string(),
+  })),
+  read_files: result(loose({
+    files: z.array(z.unknown()),
+    succeeded: z.number().int(),
+    failed: z.number().int(),
+    outputBytes: z.number().int(),
+    outputLimitBytes: z.number().int(),
+    truncated: z.boolean(),
+  })),
+  read_image: result(loose({ path: z.string(), size: z.number(), mimeType: z.string(), sha256: z.string() })),
+  write_file: result(loose({ path: z.string(), created: z.boolean(), bytes: z.number().int(), sha256: z.string() })),
+  replace_text: result(loose({ path: z.string(), replacements: z.number().int(), sha256: z.string() })),
+  apply_patch: result(loose({
+    cwd: z.string(),
+    files: z.array(loose({ path: z.string(), exists: z.boolean() })),
+    patchBytes: z.number().int(),
+    stdout: z.string(),
+    stderr: z.string(),
+    truncated: z.boolean(),
+  })),
+  create_directory: result(loose({ path: z.string() })),
+  run_command: result(loose({
+    argv: stringArray,
+    cwd: z.string(),
+    status: z.string(),
+    ok: z.boolean(),
+    exitCode: z.number().nullable(),
+    timedOut: z.boolean(),
+    durationMs: z.number(),
+    stdout: z.string(),
+    stderr: z.string(),
+    output: z.string(),
+    truncated: z.boolean(),
+    sandboxed: z.boolean(),
+  })),
+  start_job: result(job),
+  list_jobs: result(loose({ jobs: z.array(job), total: z.number().int(), active: z.number().int() })),
+  job_status: result(job),
+  job_tail: result(loose({
+    jobId: z.string(),
+    status: z.string(),
+    alive: z.boolean(),
+    logPath: z.string(),
+    output: z.string(),
+    returnedLines: z.number().int(),
+    bytesRead: z.number().int(),
+    fileSize: z.number().int(),
+    truncated: z.boolean(),
+  })),
+  wait_job: result(loose({
+    timedOut: z.boolean(),
+    waitedMs: z.number(),
+    status: job,
+    tail: z.unknown(),
+  })),
+  cancel_job: result(loose({ jobId: z.string(), status: z.string(), stopped: z.boolean(), alive: z.boolean() })),
+  git_status: result(loose({
+    root: z.string(),
+    clean: z.boolean(),
+    branch: z.record(z.string(), z.unknown()),
+    changes: z.array(z.unknown()),
+    raw: z.string(),
+    truncated: z.boolean(),
+  })),
+  git_diff: result(loose({ root: z.string(), staged: z.boolean(), base: z.string(), file: z.string(), diff: z.string(), truncated: z.boolean() })),
+  git_log: result(loose({ root: z.string(), revision: z.string(), commits: z.array(z.unknown()), truncated: z.boolean() })),
+  computer_screenshot: result(loose({
+    path: z.string(),
+    mimeType: z.string(),
+    bytes: z.number().int(),
+    sha256: z.string(),
+    capturedAt: z.string(),
+    activeApp: z.string().nullable(),
+  })),
+  computer_active_app: result(loose({ activeApp: z.string(), app: z.unknown(), inspectedAt: z.string() })),
+  computer_inspect_ui: result(loose({
+    ok: z.literal(true),
+    snapshotId: z.string(),
+    expiresInSeconds: z.number().int(),
+    inspectedAt: z.string(),
+    app: z.unknown(),
+    elements: z.array(loose({ path: z.string(), role: z.string(), title: z.string(), pressable: z.boolean() })),
+    count: z.number().int(),
+    truncated: z.boolean(),
+    backend: z.string(),
+  })),
+  computer_press_element: result(loose({
+    ok: z.literal(true),
+    action: z.literal("AXPress"),
+    snapshotId: z.string(),
+    elementPath: z.string(),
+    app: z.unknown(),
+    backend: z.string(),
+    verificationRecommended: z.boolean(),
+  })),
+  computer_action: result(loose({ ok: z.literal(true), action: z.string(), elapsedMs: z.number() })),
+});
+
+export function outputSchemaFor(toolName) {
+  const schema = OUTPUT_SCHEMAS[toolName];
+  if (!schema) throw new Error(`Missing output schema for MCP tool: ${toolName}`);
+  return schema;
+}
